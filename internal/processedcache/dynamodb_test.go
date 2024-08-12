@@ -2,7 +2,7 @@ package processedcache
 
 import (
 	"context"
-	"github.com/cresta/atlantis-drift-detection/internal/testhelper"
+	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

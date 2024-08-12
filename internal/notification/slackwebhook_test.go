@@ -1,7 +1,7 @@
 package notification
 
 import (
-	"github.com/cresta/atlantis-drift-detection/internal/testhelper"
+	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 	"net/http"
 	"testing"
 )

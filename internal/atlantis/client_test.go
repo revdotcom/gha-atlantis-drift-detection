@@ -3,7 +3,7 @@ package atlantis
 import (
 	"context"
 	"encoding/json"
-	"github.com/cresta/atlantis-drift-detection/internal/testhelper"
+	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"

@@ -87,7 +87,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
       - name: detect drift
-        uses: cresta/atlantis-drift-detection@v0.0.7
+        uses: revdotcom/gha-atlantis-drift-detection@v0.0.7
         env:
           ATLANTIS_HOST: atlantis.atlantis.svc.cluster.local
           ATLANTIS_TOKEN: ${{ secrets.ATLANTIS_TOKEN }}
