@@ -1,5 +1,7 @@
 FROM public.ecr.aws/docker/library/golang:1.22.5 as build
 
+LABEL org.opencontainers.image.source https://github.com/revdotcom/gha-atlantis-drift-detection
+
 WORKDIR /app
 
 COPY go.mod .
