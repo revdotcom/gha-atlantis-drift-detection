@@ -46,8 +46,8 @@ func ParseRepoConfig(body string) (*SimpleAtlantisConfig, error) {
 	return &ret, nil
 }
 
-func ParseRepoConfigFromDir(dir string) (*SimpleAtlantisConfig, error) {
-	filename := filepath.Join(dir, "atlantis.yaml")
+func ParseRepoConfigFromDir(atlantisYmlSubpath string, dir string) (*SimpleAtlantisConfig, error) {
+	filename := filepath.Join(dir, atlantisYmlSubpath)
 	body, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("error reading config: %s", err)

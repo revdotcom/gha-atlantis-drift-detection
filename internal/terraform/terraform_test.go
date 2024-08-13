@@ -2,8 +2,8 @@ package terraform
 
 import (
 	"context"
-	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 	"github.com/cresta/pipe"
+	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 	"path/filepath"

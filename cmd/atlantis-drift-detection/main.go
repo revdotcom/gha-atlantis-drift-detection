@@ -7,14 +7,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/cresta/gogit"
+	"github.com/cresta/gogithub"
+	"github.com/joho/godotenv"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/atlantis"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/drifter"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/notification"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/processedcache"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/terraform"
-	"github.com/cresta/gogit"
-	"github.com/cresta/gogithub"
-	"github.com/joho/godotenv"
 
 	// Empty import allows pinning to version atlantis uses
 	_ "github.com/nlopes/slack"
@@ -23,19 +23,20 @@ import (
 import "github.com/joeshaw/envdecode"
 
 type config struct {
-	Repo               string        `env:"REPO,required"`
-	AtlantisHostname   string        `env:"ATLANTIS_HOST,required"`
-	AtlantisToken      string        `env:"ATLANTIS_TOKEN,required"`
-	DirectoryWhitelist []string      `env:"DIRECTORY_WHITELIST"`
-	SlackWebhookURL    string        `env:"SLACK_WEBHOOK_URL"`
-	SkipWorkspaceCheck bool          `env:"SKIP_WORKSPACE_CHECK"`
-	ParallelRuns       int           `env:"PARALLEL_RUNS"`
-	DynamodbTable      string        `env:"DYNAMODB_TABLE"`
-	CacheValidDuration time.Duration `env:"CACHE_VALID_DURATION,default=24h"`
-	WorkflowOwner      string        `env:"WORKFLOW_OWNER"`
-	WorkflowRepo       string        `env:"WORKFLOW_REPO"`
-	WorkflowId         string        `env:"WORKFLOW_ID"`
-	WorkflowRef        string        `env:"WORKFLOW_REF"`
+	Repo                   string        `env:"REPO,required"`
+	AtlantisHostname       string        `env:"ATLANTIS_HOST,required"`
+	AtlantisToken          string        `env:"ATLANTIS_TOKEN,required"`
+	DirectoryWhitelist     []string      `env:"DIRECTORY_WHITELIST"`
+	SlackWebhookURL        string        `env:"SLACK_WEBHOOK_URL"`
+	AtlantisRepoConfigPath string        `env:"ATLANTIS_REPO_CONFIG_PATH,default=.atlantis/atlantis.yml"`
+	SkipWorkspaceCheck     bool          `env:"SKIP_WORKSPACE_CHECK"`
+	ParallelRuns           int           `env:"PARALLEL_RUNS"`
+	DynamodbTable          string        `env:"DYNAMODB_TABLE"`
+	CacheValidDuration     time.Duration `env:"CACHE_VALID_DURATION,default=24h"`
+	WorkflowOwner          string        `env:"WORKFLOW_OWNER"`
+	WorkflowRepo           string        `env:"WORKFLOW_REPO"`
+	WorkflowId             string        `env:"WORKFLOW_ID"`
+	WorkflowRef            string        `env:"WORKFLOW_REF"`
 }
 
 func loadEnvIfExists() error {
@@ -130,6 +131,7 @@ func main() {
 		DirectoryWhitelist: cfg.DirectoryWhitelist,
 		Logger:             logger.With(zap.String("drifter", "true")),
 		Repo:               cfg.Repo,
+		AtlantisRepoYmlPath:    cfg.AtlantisRepoConfigPath,
 		AtlantisClient: &atlantis.Client{
 			AtlantisHostname: cfg.AtlantisHostname,
 			Token:            cfg.AtlantisToken,

@@ -2,8 +2,8 @@ package notification
 
 import (
 	"context"
-	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 	"github.com/cresta/gogithub"
+	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 	"go.uber.org/zap/zaptest"
 	"testing"
 )

@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/cresta/gogit"
+	"github.com/cresta/gogithub"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/atlantis"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/atlantisgithub"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/notification"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/processedcache"
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/terraform"
-	"github.com/cresta/gogit"
-	"github.com/cresta/gogithub"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"os"
@@ -18,18 +18,19 @@ import (
 )
 
 type Drifter struct {
-	Logger             *zap.Logger
-	Repo               string
-	Cloner             *gogit.Cloner
-	GithubClient       gogithub.GitHub
-	Terraform          *terraform.Client
-	Notification       notification.Notification
-	AtlantisClient     *atlantis.Client
-	ResultCache        processedcache.ProcessedCache
-	CacheValidDuration time.Duration
-	DirectoryWhitelist []string
-	SkipWorkspaceCheck bool
-	ParallelRuns       int
+	Logger              *zap.Logger
+	Repo                string
+	Cloner              *gogit.Cloner
+	GithubClient        gogithub.GitHub
+	Terraform           *terraform.Client
+	AtlantisRepoYmlPath string
+	Notification        notification.Notification
+	AtlantisClient      *atlantis.Client
+	ResultCache         processedcache.ProcessedCache
+	CacheValidDuration  time.Duration
+	DirectoryWhitelist  []string
+	SkipWorkspaceCheck  bool
+	ParallelRuns        int
 }
 
 func (d *Drifter) Drift(ctx context.Context) error {
@@ -43,7 +44,7 @@ func (d *Drifter) Drift(ctx context.Context) error {
 			d.Logger.Warn("failed to cleanup repo", zap.Error(err))
 		}
 	}()
-	cfg, err := atlantis.ParseRepoConfigFromDir(repo.Location())
+	cfg, err := atlantis.ParseRepoConfigFromDir(d.AtlantisRepoYmlPath, repo.Location())
 	if err != nil {
 		return fmt.Errorf("failed to parse repo config: %w", err)
 	}
