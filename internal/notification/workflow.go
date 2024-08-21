@@ -44,7 +44,7 @@ func (w *Workflow) MissingWorkspaceInRemote(_ context.Context, _ string, _ strin
 	return nil
 }
 
-func (w *Workflow) PlanDrift(ctx context.Context, dir string, _ string) error {
+func (w *Workflow) PlanDrift(ctx context.Context, dir string, _ string, cliffnote string) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if w.directoriesDone == nil {
@@ -57,6 +57,10 @@ func (w *Workflow) PlanDrift(ctx context.Context, dir string, _ string) error {
 	return w.GhClient.TriggerWorkflow(ctx, w.WorkflowOwner, w.WorkflowRepo, w.WorkflowId, w.WorkflowRef, map[string]string{
 		"directory": dir,
 	})
+}
+
+func (w *Workflow) WorkspaceDriftSummary(_ context.Context, _ int32) error {
+	return nil
 }
 
 var _ Notification = &Workflow{}

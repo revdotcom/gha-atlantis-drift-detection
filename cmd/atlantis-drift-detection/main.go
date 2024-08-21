@@ -17,26 +17,27 @@ import (
 	"github.com/revdotcom/gha-atlantis-drift-detection/internal/terraform"
 
 	// Empty import allows pinning to version atlantis uses
+	"github.com/joeshaw/envdecode"
 	_ "github.com/nlopes/slack"
 	"go.uber.org/zap"
 )
-import "github.com/joeshaw/envdecode"
 
 type config struct {
 	Repo                   string        `env:"REPO,required"`
 	AtlantisHostname       string        `env:"ATLANTIS_HOST,required"`
 	AtlantisToken          string        `env:"ATLANTIS_TOKEN,required"`
-	DirectoryWhitelist     []string      `env:"DIRECTORY_WHITELIST"`
+	DirectoryAllowlist     []string      `env:"DIRECTORY_ALLOWLIST"`
 	SlackWebhookURL        string        `env:"SLACK_WEBHOOK_URL"`
 	AtlantisRepoConfigPath string        `env:"ATLANTIS_REPO_CONFIG_PATH,default=.atlantis/atlantis.yml"`
-	SkipWorkspaceCheck     bool          `env:"SKIP_WORKSPACE_CHECK"`
-	ParallelRuns           int           `env:"PARALLEL_RUNS"`
+	SkipWorkspaceCheck     bool          `env:"SKIP_WORKSPACE_CHECK,default=true"`
+	ParallelRuns           int           `env:"PARALLEL_RUNS,default=1"`
 	DynamodbTable          string        `env:"DYNAMODB_TABLE"`
 	CacheValidDuration     time.Duration `env:"CACHE_VALID_DURATION,default=24h"`
 	WorkflowOwner          string        `env:"WORKFLOW_OWNER"`
 	WorkflowRepo           string        `env:"WORKFLOW_REPO"`
 	WorkflowId             string        `env:"WORKFLOW_ID"`
 	WorkflowRef            string        `env:"WORKFLOW_REF"`
+	AutoGenerateConfig     bool          `env:"AUTO_GENERATE_ATLANTIS_CONFIG,default=true"`
 }
 
 func loadEnvIfExists() error {
@@ -128,10 +129,10 @@ func main() {
 	}
 
 	d := drifter.Drifter{
-		DirectoryWhitelist: cfg.DirectoryWhitelist,
-		Logger:             logger.With(zap.String("drifter", "true")),
-		Repo:               cfg.Repo,
-		AtlantisRepoYmlPath:    cfg.AtlantisRepoConfigPath,
+		DirectoryAllowlist:  cfg.DirectoryAllowlist,
+		Logger:              logger.With(zap.String("drifter", "true")),
+		Repo:                cfg.Repo,
+		AtlantisRepoYmlPath: cfg.AtlantisRepoConfigPath,
 		AtlantisClient: &atlantis.Client{
 			AtlantisHostname: cfg.AtlantisHostname,
 			Token:            cfg.AtlantisToken,
@@ -145,6 +146,7 @@ func main() {
 		Terraform:          &tf,
 		Notification:       notif,
 		SkipWorkspaceCheck: cfg.SkipWorkspaceCheck,
+		AutoGenerateConfig: cfg.AutoGenerateConfig,
 	}
 	if err := d.Drift(ctx); err != nil {
 		logger.Panic("failed to drift", zap.Error(err))

@@ -55,15 +55,43 @@ func (s *SlackWebhook) sendSlackMessage(ctx context.Context, msg string) error {
 }
 
 func (s *SlackWebhook) ExtraWorkspaceInRemote(ctx context.Context, dir string, workspace string) error {
-	return s.sendSlackMessage(ctx, fmt.Sprintf("Extra workspace in remote\nDirectory: %s\nWorkspace: %s", dir, workspace))
+	msg := ""
+	if len(workspace) == 0 {
+		msg = fmt.Sprintf("Extra workspace in remote\nDirectory: `%s`", dir)
+	} else {
+		msg = fmt.Sprintf("Extra workspace in remote\nDirectory: `%s`\nWorkspace: `%s`", dir, workspace)
+	}
+	return s.sendSlackMessage(ctx, msg)
 }
 
 func (s *SlackWebhook) MissingWorkspaceInRemote(ctx context.Context, dir string, workspace string) error {
-	return s.sendSlackMessage(ctx, fmt.Sprintf("Missing workspace in remote\nDirectory: %s\nWorkspace: %s", dir, workspace))
+	msg := ""
+	if len(workspace) == 0 {
+		msg = fmt.Sprintf("Missing workspace in remote\nRoot module: `%s`", dir)
+	} else {
+		msg = fmt.Sprintf("Missing workspace in remote\nRoot module: `%s`\nWorkspace: `%s`", dir, workspace)
+	}
+	return s.sendSlackMessage(ctx, msg)
 }
 
-func (s *SlackWebhook) PlanDrift(ctx context.Context, dir string, workspace string) error {
-	return s.sendSlackMessage(ctx, fmt.Sprintf("Plan Drift workspace in remote\nDirectory: %s\nWorkspace: %s", dir, workspace))
+func (s *SlackWebhook) PlanDrift(ctx context.Context, dir string, workspace string, cliffnote string) error {
+	msg := ""
+	if len(workspace) == 0 {
+		msg = fmt.Sprintf(":exclamation: *Drift detected*\n:terraform: *Root module:* `%s`\n:pencil: *Result:* `%s`", dir, cliffnote)
+	} else {
+		msg = fmt.Sprintf(":exclamation: *Drift detected*\n:terraform: *Root module:* `%s`\nWorkspace: `%s`\n:pencil: *Result:* `%s`", dir, workspace, cliffnote)
+	}
+	return s.sendSlackMessage(ctx, msg)
+}
+
+func (s *SlackWebhook) WorkspaceDriftSummary(ctx context.Context, workspacesDrifted int32) error {
+	msg := ""
+	if workspacesDrifted == 0 {
+		msg = fmt.Sprint(":checked_animated: *Total Workspaces Drifted:* 0")
+	} else {
+		msg = fmt.Sprintf(":checkered_flag: *Total Workspaces Drifted:* %d", workspacesDrifted)
+	}
+	return s.sendSlackMessage(ctx, msg)
 }
 
 var _ Notification = &SlackWebhook{}

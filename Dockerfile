@@ -9,7 +9,7 @@ COPY go.sum .
 RUN go mod download
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w' -o /atlantis-drift-detection ./cmd/atlantis-drift-detection/main.go
+RUN CGO_ENABLED=0 GOOS=linux GODEBUG=asyncpreemptoff=1 go build -a -tags netgo -ldflags '-w' -o /atlantis-drift-detection ./cmd/atlantis-drift-detection/main.go
 
 FROM public.ecr.aws/docker/library/ubuntu:24.04
 

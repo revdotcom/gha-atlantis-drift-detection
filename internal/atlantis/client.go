@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/runatlantis/atlantis/server/controllers"
@@ -46,6 +47,26 @@ func (p *PlanResult) HasChanges() bool {
 		}
 	}
 	return false
+}
+
+func (p *PlanResult) GetPlanResultSummary() string {
+	cliffnoteRe := regexp.MustCompile(`Plan:.*`)
+	extChangesRe := regexp.MustCompile(`Note: Objects have changed outside.*`)
+	var summaryBuilder strings.Builder
+	for _, summary := range p.Summaries {
+		// Check to see if any changes were potentially made outside of TF
+		if extChangesRe.MatchString(summary.Summary) {
+			summaryBuilder.WriteString("NOTE: Objects have changed outside of Terraform.\n")
+		}
+		// Check to see if we can capture the Plan minutia like:
+		// Plan: 1 to add, 0 to change, 0 to destroy.
+		res := cliffnoteRe.FindAllStringSubmatch(summary.Summary, 1)
+		for r := range res {
+			summaryBuilder.WriteString(res[r][0] + "\n")
+		}
+	}
+
+	return strings.TrimSuffix(summaryBuilder.String(), "\n")
 }
 
 func (p *PlanResult) IsLocked() bool {
@@ -151,6 +172,7 @@ func (c *Client) PlanSummary(ctx context.Context, req *PlanSummaryRequest) (*Pla
 		if result.PlanSuccess != nil {
 			summary := result.PlanSuccess.Summary()
 			ret.Summaries = append(ret.Summaries, PlanSummary{Summary: summary})
+
 			continue
 		}
 		return nil, fmt.Errorf("project result unknown failure: %s", result.Failure)

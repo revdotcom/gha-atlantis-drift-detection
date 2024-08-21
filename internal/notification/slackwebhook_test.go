@@ -1,9 +1,10 @@
 package notification
 
 import (
-	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 	"net/http"
 	"testing"
+
+	"github.com/revdotcom/gha-atlantis-drift-detection/internal/testhelper"
 )
 
 func TestSlackWebhook_ExtraWorkspaceInRemote(t *testing.T) {
