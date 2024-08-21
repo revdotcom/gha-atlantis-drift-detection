@@ -118,13 +118,16 @@ jobs:
 | `WORKFLOW_REF`           | The git ref to trigger the workflow on                                           | No       |                            | `master`                                                            |
 | `DIRECTORY_ALLOWLIST`    | A comma separated list of directories to check                                   | No       |                            | `terraform,modules`                                                 |
 | `SLACK_WEBHOOK_URL`      | The Slack webhook URL to post updates to                                         | No       |                            | `https://hooks.slack.com/services/1234567890/1234567890/1234567890` |
-| `SKIP_WORKSPACE_CHECK`   | Skip checking if the workspace have drifted                                      | No       | `false`                    | `true`                                                              |
+| `SKIP_WORKSPACE_CHECK`   | Skip checking if the workspace have drifted                                      | No       | `true`                     | `true`                                                              |
 | `PARALLEL_RUNS`          | The number of parallel runs to use                                               | No       | `1`                        | `10`                                                                |
 | `DYNAMODB_TABLE`         | The name of the DynamoDB table to use for caching results                        | No       | `atlantis-drift-detection` | `atlantis-drift-detection`                                          |
 | `CACHE_VALID_DURATION`   | The duration that previous results are still valid                               | No       | `24h`                      | `180h`                                                              |
 | `GITHUB_APP_ID`          | An application ID to use for github API calls                                    | No       |                            | `123123`                                                            |
 | `GITHUB_INSTALLATION_ID` | An application install ID to use for github API calls                            | No       |                            | `123123`                                                            |
 | `GITHUB_PEM_KEY`         | A GitHub PEM key of an application, used to authenticate the app for API calls   | No       |                            | `1231DEADBEAF....`                                                  |
+| `AUTO_GENERATE_ATLANTIS_CONFIG` | Toggles automatic generation of the Atlantis repo.yml project file        | No       |  `true`                    | `true`                                                              |
+
+
 
 # Local development
 
