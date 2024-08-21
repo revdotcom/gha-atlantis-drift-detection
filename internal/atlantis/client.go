@@ -52,12 +52,17 @@ func (p *PlanResult) HasChanges() bool {
 func (p *PlanResult) GetPlanResultSummary() string {
 	cliffnoteRe := regexp.MustCompile(`Plan:.*`)
 	extChangesRe := regexp.MustCompile(`Note: Objects have changed outside.*`)
+	outputChangesRe := regexp.MustCompile(`.*Changes to Outputs.*`)
 	var summaryBuilder strings.Builder
 	for _, summary := range p.Summaries {
 		// Check to see if any changes were potentially made outside of TF
 		if extChangesRe.MatchString(summary.Summary) {
-			summaryBuilder.WriteString("NOTE: Objects have changed outside of Terraform.\n")
+			summaryBuilder.WriteString("Note: Objects have changed outside of Terraform.\n")
 		}
+		if outputChangesRe.MatchString(summary.Summary) {
+			summaryBuilder.WriteString("Note: Contains output changes.\n")
+		}
+
 		// Check to see if we can capture the Plan minutia like:
 		// Plan: 1 to add, 0 to change, 0 to destroy.
 		res := cliffnoteRe.FindAllStringSubmatch(summary.Summary, 1)
@@ -66,6 +71,9 @@ func (p *PlanResult) GetPlanResultSummary() string {
 		}
 	}
 
+	if len(summaryBuilder.String()) == 0 {
+		return "Note: Drift detected but no notes parsed."
+	}
 	return strings.TrimSuffix(summaryBuilder.String(), "\n")
 }
 

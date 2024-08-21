@@ -77,9 +77,17 @@ func (s *SlackWebhook) MissingWorkspaceInRemote(ctx context.Context, dir string,
 func (s *SlackWebhook) PlanDrift(ctx context.Context, dir string, workspace string, cliffnote string) error {
 	msg := ""
 	if len(workspace) == 0 {
-		msg = fmt.Sprintf(":exclamation: *Drift detected*\n:terraform: *Root module:* `%s`\n:pencil: *Result:* `%s`", dir, cliffnote)
+		if len(cliffnote) > 50 {
+			msg = fmt.Sprintf(":exclamation: *Drift detected*\n:terraform: *Root module:* `%s`\n:pencil: *Result:* \n```\n%s\n```", dir, cliffnote)
+		} else {
+			msg = fmt.Sprintf(":exclamation: *Drift detected*\n:terraform: *Root module:* `%s`\n:pencil: *Result:* `%s`", dir, cliffnote)
+		}
 	} else {
-		msg = fmt.Sprintf(":exclamation: *Drift detected*\n:terraform: *Root module:* `%s`\nWorkspace: `%s`\n:pencil: *Result:* `%s`", dir, workspace, cliffnote)
+		if len(cliffnote) > 50 {
+			msg = fmt.Sprintf(":exclamation: *Drift detected*\n:terraform: *Root module:* `%s`\nWorkspace: `%s`\n:pencil: *Result:* \n```\n%s\n```", dir, workspace, cliffnote)
+		} else {
+			msg = fmt.Sprintf(":exclamation: *Drift detected*\n:terraform: *Root module:* `%s`\nWorkspace: `%s`\n:pencil: *Result:* `%s`", dir, workspace, cliffnote)
+		}
 	}
 	return s.sendSlackMessage(ctx, msg)
 }
@@ -87,7 +95,7 @@ func (s *SlackWebhook) PlanDrift(ctx context.Context, dir string, workspace stri
 func (s *SlackWebhook) WorkspaceDriftSummary(ctx context.Context, workspacesDrifted int32) error {
 	msg := ""
 	if workspacesDrifted == 0 {
-		msg = fmt.Sprint(":checked_animated: *Total Workspaces Drifted:* 0")
+		msg = ":checked_animated: *Total Workspaces Drifted:* 0"
 	} else {
 		msg = fmt.Sprintf(":checkered_flag: *Total Workspaces Drifted:* %d", workspacesDrifted)
 	}
