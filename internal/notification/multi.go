@@ -42,9 +42,9 @@ func (m *Multi) PlanDrift(ctx context.Context, dir string, workspace string, cli
 	return nil
 }
 
-func (m *Multi) WorkspaceDriftSummary(ctx context.Context, workspacesDrifted int32) error {
+func (m *Multi) WorkspaceDriftSummary(ctx context.Context, workspacesDrifted int32, workspacesUndrifted int32, totalWorkspaces int32) error {
 	for _, n := range m.Notifications {
-		if err := n.WorkspaceDriftSummary(ctx, workspacesDrifted); err != nil {
+		if err := n.WorkspaceDriftSummary(ctx, workspacesDrifted, workspacesUndrifted, totalWorkspaces); err != nil {
 			return err
 		}
 	}

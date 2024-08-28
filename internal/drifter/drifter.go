@@ -26,21 +26,23 @@ import (
 )
 
 type Drifter struct {
-	Logger                *zap.Logger
-	Repo                  string
-	Cloner                *gogit.Cloner
-	GithubClient          gogithub.GitHub
-	Terraform             *terraform.Client
-	AtlantisRepoYmlPath   string
-	Notification          notification.Notification
-	AtlantisClient        *atlantis.Client
-	ResultCache           processedcache.ProcessedCache
-	CacheValidDuration    time.Duration
-	DirectoryAllowlist    []string
-	SkipWorkspaceCheck    bool
-	ParallelRuns          int
-	AutoGenerateConfig    bool
-	DriftedWorkspaceCount int32
+	Logger                  *zap.Logger
+	Repo                    string
+	Cloner                  *gogit.Cloner
+	GithubClient            gogithub.GitHub
+	Terraform               *terraform.Client
+	AtlantisRepoYmlPath     string
+	Notification            notification.Notification
+	AtlantisClient          *atlantis.Client
+	ResultCache             processedcache.ProcessedCache
+	CacheValidDuration      time.Duration
+	DirectoryAllowlist      []string
+	SkipWorkspaceCheck      bool
+	ParallelRuns            int
+	AutoGenerateConfig      bool
+	DriftedWorkspaceCount   int32
+	UndriftedWorkspaceCount int32
+	TotalWorkspacesCount    int32
 }
 
 func (d *Drifter) Drift(ctx context.Context) error {
@@ -82,11 +84,12 @@ func (d *Drifter) Drift(ctx context.Context) error {
 		return fmt.Errorf("failed to find drifted workspaces: %w", err)
 	}
 	d.Logger.Info("Total number of workspaces drifted", zap.Int32("drifted workspaces", d.DriftedWorkspaceCount))
+	d.Logger.Info("Total number of workspaces without drift", zap.Int32("drifted workspaces", d.UndriftedWorkspaceCount))
 	d.Logger.Info("Finished checking for drifted workspaces. Checking for extra workspaces.")
 	if err := d.FindExtraWorkspaces(ctx, workspaces); err != nil {
 		return fmt.Errorf("failed to find extra workspaces: %w", err)
 	}
-	d.Notification.WorkspaceDriftSummary(ctx, d.DriftedWorkspaceCount)
+	d.Notification.WorkspaceDriftSummary(ctx, d.DriftedWorkspaceCount, d.UndriftedWorkspaceCount, d.TotalWorkspacesCount)
 	d.Logger.Info("Finished checking for workspaces with extra drift.")
 	return nil
 }
@@ -191,6 +194,7 @@ func (d *Drifter) FindDriftedWorkspaces(ctx context.Context, ws atlantis.Directo
 					}
 					return fmt.Errorf("failed to get plan summary for (%s#%s): %w", dir, workspace, err)
 				}
+				atomic.AddInt32(&d.TotalWorkspacesCount, 1)
 				if err := d.ResultCache.StoreDriftCheckResult(ctx, cacheKey, &processedcache.DriftCheckValue{
 					When:  time.Now(),
 					Error: "",
@@ -208,6 +212,8 @@ func (d *Drifter) FindDriftedWorkspaces(ctx context.Context, ws atlantis.Directo
 					if err := d.Notification.PlanDrift(ctx, dir, workspace, cliffnote); err != nil {
 						return fmt.Errorf("failed to notify of plan drift in %s: %w", dir, err)
 					}
+				} else {
+					atomic.AddInt32(&d.UndriftedWorkspaceCount, 1)
 				}
 			}
 			return nil

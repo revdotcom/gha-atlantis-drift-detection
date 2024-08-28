@@ -59,7 +59,7 @@ func (w *Workflow) PlanDrift(ctx context.Context, dir string, _ string, cliffnot
 	})
 }
 
-func (w *Workflow) WorkspaceDriftSummary(_ context.Context, _ int32) error {
+func (w *Workflow) WorkspaceDriftSummary(_ context.Context, _ int32, _ int32, _ int32) error {
 	return nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type SlackWebhook struct {
@@ -92,14 +93,17 @@ func (s *SlackWebhook) PlanDrift(ctx context.Context, dir string, workspace stri
 	return s.sendSlackMessage(ctx, msg)
 }
 
-func (s *SlackWebhook) WorkspaceDriftSummary(ctx context.Context, workspacesDrifted int32) error {
-	msg := ""
+func (s *SlackWebhook) WorkspaceDriftSummary(ctx context.Context, workspacesDrifted int32, workspacesUndrifted int32, totalWorkspaces int32) error {
+	var msgBuilder strings.Builder
 	if workspacesDrifted == 0 {
-		msg = ":checked_animated: *Total Workspaces Drifted:* 0"
+		msgBuilder.WriteString(fmt.Sprintf(":checked_animated: *Total Workspaces Drifted:* 0 / %d", totalWorkspaces))
 	} else {
-		msg = fmt.Sprintf(":checkered_flag: *Total Workspaces Drifted:* %d", workspacesDrifted)
+		pct := (float32(workspacesDrifted) / float32(totalWorkspaces) * 100)
+		msgBuilder.WriteString(fmt.Sprintf(":checkered_flag: *Total Workspaces Drifted:* %d / %d (%.1f%%)", workspacesDrifted, totalWorkspaces, pct))
 	}
-	return s.sendSlackMessage(ctx, msg)
+	undriftPct := (float32(workspacesUndrifted) / float32(totalWorkspaces) * 100)
+	msgBuilder.WriteString(fmt.Sprintf("\n:checked_animated: *Total Workspaces Undrifted:* %d / %d (%.1f%%)", workspacesUndrifted, totalWorkspaces, undriftPct))
+	return s.sendSlackMessage(ctx, msgBuilder.String())
 }
 
 var _ Notification = &SlackWebhook{}

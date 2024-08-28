@@ -30,7 +30,7 @@ func (I *Zap) MissingWorkspaceInRemote(_ context.Context, dir string, workspace 
 	return nil
 }
 
-func (i *Zap) WorkspaceDriftSummary(_ context.Context, _ int32) error {
+func (i *Zap) WorkspaceDriftSummary(_ context.Context, _ int32, _ int32, _ int32) error {
 	return nil
 }
 
